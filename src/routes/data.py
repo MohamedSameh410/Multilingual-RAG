@@ -14,4 +14,7 @@ async def upload_file(file: UploadFile, app_settings: settings = Depends(get_set
 
     if is_valid and check_dir:
         await data_controller.save_file(file= file)
-        return {"status": "success", "message": "File uploaded successfully"}
+        return {"status": "success",
+                "message": "File uploaded successfully",
+                "file_id": data_controller.file_id
+                }

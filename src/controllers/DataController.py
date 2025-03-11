@@ -10,6 +10,8 @@ class DataController(BaseController):
         super().__init__()
         self.size_scale = 1024 * 1024 #Convert fron MB to bytes
 
+        self.file_id = ""
+
     def validate_file(self, file: UploadFile):
         
         if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES:
@@ -29,11 +31,24 @@ class DataController(BaseController):
     
     async def save_file(self, file: UploadFile):
         
-        cleaned_filename = self.clean_filename(file.filename)
-        file_path = os.path.join(self.files_dir, cleaned_filename)
+        self.file_id = self.generate_file_id(file.filename)
+        file_path = os.path.join(self.files_dir, self.file_id)
+
+        while os.path.exists(file_path):
+            self.file_id = self.generate_file_id(file.filename)
+            file_path = os.path.join(self.files_dir, self.file_id)
+
         async with aiofiles.open(file_path, "wb") as f:
             while chunk := await file.read((self.app_settings.FILE_CHUNK_SIZE) * self.size_scale):
                 await f.write(chunk)
+
+    
+    def generate_file_id(self, filename: str):
+        random_key = self.generate_random_string()
+        self.file_id = random_key + "_" + self.clean_filename(filename)
+
+        return self.file_id
+        
         
     def clean_filename(self, filename: str):
 
