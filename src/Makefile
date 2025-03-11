@@ -2,6 +2,6 @@ install:
 	pip install --upgrade pip &&\
 		pip install -r requirements.txt
 
-run:
+run-uvicorn:
 	uvicorn main:app --reload
 all: install
