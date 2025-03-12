@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter, Depends, UploadFile
 from helpers.config import get_settings, settings
 from controllers import DataController
+from .schemas import ProcessRequest
 import os
 
 data_router = APIRouter()
@@ -18,3 +19,11 @@ async def upload_file(file: UploadFile, app_settings: settings = Depends(get_set
                 "message": "File uploaded successfully",
                 "file_id": data_controller.file_id
                 }
+    
+
+@data_router.post("/processfile")
+async def process_file(process_request: ProcessRequest):
+
+    file_id = process_request.file_id
+
+    return file_id
