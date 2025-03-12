@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter, Depends, UploadFile
 from helpers.config import get_settings, settings
-from controllers import DataController
+from controllers import DataController, ProcessController
 from .schemas import ProcessRequest
 import os
 
@@ -25,5 +25,21 @@ async def upload_file(file: UploadFile, app_settings: settings = Depends(get_set
 async def process_file(process_request: ProcessRequest):
 
     file_id = process_request.file_id
+    chunk_size = process_request.chunk_size
+    overlap_size = process_request.overlap_size
 
-    return file_id
+    process_controller = ProcessController()
+    file_content = process_controller.get_file_content(file_id= file_id)
+    file_chunks = process_controller.process_file_content(
+        file_content= file_content,
+        file_id= file_id,
+        chunk_size= chunk_size,
+        overlap_size= overlap_size
+    )
+
+    if file_chunks is None or len(file_chunks) == 0:
+        return {"status": "error",
+                "message": "Error processing file"
+                }
+    
+    return file_chunks

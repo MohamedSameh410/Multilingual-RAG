@@ -37,7 +37,7 @@ class ProcessController(BaseController):
         
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size= chunk_size,
-            overlap_size= overlap_size,
+            chunk_overlap= overlap_size,
             length_function= len,
         )
 
@@ -53,3 +53,5 @@ class ProcessController(BaseController):
             file_content_texts, 
             metadatas= file_content_metadata
         )
+
+        return chunks
