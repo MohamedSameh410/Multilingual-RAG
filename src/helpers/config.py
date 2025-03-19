@@ -9,7 +9,7 @@ class settings(BaseSettings):
     FILE_MAX_SIZE: int
     FILE_CHUNK_SIZE: int
 
-    MONGO_URI: str
+    MONGO_URL: str
     MONGO_DB: str
 
     class Config:

@@ -7,10 +7,11 @@ from helpers.config import get_settings, settings
 app = FastAPI()
 
 @app.on_event("startup")
-async def startup_db_client(app_settings: settings = Depends(get_settings)):
+async def startup_db_client():
     
-    app.mongo_conn = AsyncIOMotorClient(app_settings.MONGO_URI)
-    app.db = app.mongo_conn[app_settings.MONGO_DB]
+    app_settings = get_settings()
+    app.mongo_conn = AsyncIOMotorClient(app_settings.MONGO_URL)
+    app.db_client = app.mongo_conn[app_settings.MONGO_DB]
 
 
 @app.on_event("shutdown")
