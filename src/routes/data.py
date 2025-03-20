@@ -32,6 +32,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
     file_id = process_request.file_id
     chunk_size = process_request.chunk_size
     overlap_size = process_request.overlap_size
+    do_resrt = process_request.do_reset
 
     file_model = FileModel(db_client= request.app.db_client)
     file_db = await file_model.get_or_insert_file(file_id= file_id)
@@ -61,6 +62,10 @@ async def process_file(request: Request, process_request: ProcessRequest):
     ]
 
     data_chunk_model = DataChunkModel(db_client= request.app.db_client)
+
+    if do_resrt:
+        await data_chunk_model.delete_data_chunks(file_id= file_db.id)
+    
     num_records = await data_chunk_model.insert_many_data_chunks(data_chunks= file_chunks_db_records)
     
     return {
