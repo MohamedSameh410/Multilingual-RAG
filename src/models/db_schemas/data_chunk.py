@@ -7,6 +7,7 @@ class DataChunk(BaseModel):
     chunk_text: str = Field(..., min_length=1)
     chunk_metadata: dict
     chunk_order: int = Field(..., gt=0)
+    file_id: ObjectId
 
 
     class config:
