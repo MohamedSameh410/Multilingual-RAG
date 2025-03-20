@@ -11,7 +11,7 @@ class DataChunkModel(BaseDataModel):
 
     async def insert_data_chunk(self, data_chunk: DataChunk):
 
-        result = await self.collection.insert_one(data_chunk.dict())
+        result = await self.collection.insert_one(data_chunk.dict(by_alias=True, exclude_unset=True))
         data_chunk._id = result.inserted_id
 
         return data_chunk
@@ -31,7 +31,7 @@ class DataChunkModel(BaseDataModel):
         for i in range(0, len(data_chunks), batch_size):
             batch = data_chunks[i: i + batch_size]
             operations = [
-                InsertOne(data_chunks.dict())
+                InsertOne(data_chunk.dict(by_alias=True, exclude_unset=True))
                 for data_chunk in batch
             ]
 

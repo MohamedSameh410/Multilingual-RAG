@@ -55,7 +55,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
             chunk_text= chunk.page_content,
             chunk_metadata= chunk.metadata,
             chunk_order= i + 1,
-            file_id= file_db._id
+            file_id= file_db.id
         )
         for i, chunk in enumerate(file_chunks)
     ]
@@ -63,4 +63,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
     data_chunk_model = DataChunkModel(db_client= request.app.db_client)
     num_records = await data_chunk_model.insert_many_data_chunks(data_chunks= file_chunks_db_records)
     
-    return num_records
+    return {
+        "message": "File processed successfully",
+        "inserted chunks": num_records
+    }

@@ -3,8 +3,7 @@ from typing import Optional
 from bson import ObjectId
 
 class File(BaseModel):
-    _id: Optional[ObjectId]
+    id: Optional[ObjectId] = Field(None, alias="_id")
     file_id: str = Field(..., min_length=1)
 
-    class config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}

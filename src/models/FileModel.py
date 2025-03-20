@@ -9,7 +9,7 @@ class FileModel(BaseDataModel):
 
     async def insert_file(self, file: File):
 
-        result = await self.collection.insert_one(file.dict())
+        result = await self.collection.insert_one(file.dict(by_alias=True, exclude_unset=True))
         file._id = result.inserted_id
 
         return file
