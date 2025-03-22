@@ -11,7 +11,7 @@ data_router = APIRouter()
 @data_router.post("/uploadfile")
 async def upload_file(request: Request, file: UploadFile, app_settings: settings = Depends(get_settings)):
     
-    file_model = FileModel(db_client= request.app.db_client)
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
     data_controller = DataController()
     is_valid = data_controller.validate_file(file= file)
     check_dir = data_controller.check_dir()
@@ -34,7 +34,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
     overlap_size = process_request.overlap_size
     do_resrt = process_request.do_reset
 
-    file_model = FileModel(db_client= request.app.db_client)
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
     file_db = await file_model.get_or_insert_file(file_id= file_id)
 
     process_controller = ProcessController()
@@ -61,7 +61,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
         for i, chunk in enumerate(file_chunks)
     ]
 
-    data_chunk_model = DataChunkModel(db_client= request.app.db_client)
+    data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
 
     if do_resrt:
         await data_chunk_model.delete_data_chunks(file_id= file_db.id)
