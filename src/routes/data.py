@@ -4,6 +4,7 @@ from controllers import DataController, ProcessController
 from .schemas import ProcessRequest
 from models import FileModel, DataChunkModel
 from models.db_schemas.data_chunk import DataChunk
+from bson.objectid import ObjectId
 import os
 
 data_router = APIRouter()
@@ -71,4 +72,23 @@ async def process_file(request: Request, process_request: ProcessRequest):
     return {
         "message": "File processed successfully",
         "inserted chunks": num_records
+    }
+
+
+def convert_objectid_to_str(document):
+    if isinstance(document, dict):
+        return {key: str(value) if isinstance(value, ObjectId) else value for key, value in document.items()}
+    elif isinstance(document, list):
+        return [convert_objectid_to_str(item) for item in document]
+    return document
+
+@data_router.post("/getChunks_byFileId/{file_id}")
+async def get_chunks_by_fileId(request: Request, file_id: str):
+
+    data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
+    chunks_by_fileId = await data_chunk_model.get_all_chunks_by_file_id(file_id= file_id)
+
+    return {
+        "message": "Data chunks retrieved successfully",
+        "chunks": convert_objectid_to_str(chunks_by_fileId)
     }

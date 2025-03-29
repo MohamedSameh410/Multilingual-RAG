@@ -64,3 +64,8 @@ class DataChunkModel(BaseDataModel):
 
         result = await self.collection.delete_many({"file_id": file_id})
         return result.deleted_count
+    
+    async def get_all_chunks_by_file_id(self, file_id: str):
+        return await self.collection.find({
+            "file_id": ObjectId(file_id) if isinstance(file_id, str) else file_id
+        }).to_list(length= None)
