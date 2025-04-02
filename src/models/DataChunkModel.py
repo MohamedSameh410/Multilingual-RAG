@@ -60,9 +60,14 @@ class DataChunkModel(BaseDataModel):
 
         return inserted_chunks
     
-    async def delete_data_chunks(self, file_id: ObjectId):
+    async def delete_data_chunks_by_fileId(self, file_id: ObjectId):
 
         result = await self.collection.delete_many({"file_id": file_id})
+        return result.deleted_count
+    
+    async def delete_data_chunks(self):
+
+        result = await self.collection.delete_many({})
         return result.deleted_count
     
     async def get_all_chunks_by_file_id(self, file_id: str):

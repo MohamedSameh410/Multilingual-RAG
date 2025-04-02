@@ -48,6 +48,17 @@ class FileModel(BaseDataModel):
         
         return File(**record)
     
+    async def get_file_record(self, file_id: str):
+
+        record = await self.collection.find_one({
+            "file_id": file_id
+        })
+
+        if record:
+            return File(**record)
+        
+        return None
+    
     async def get_all_files(self, page: int=1, page_size: int=10):
 
         # calculate the number of documents
