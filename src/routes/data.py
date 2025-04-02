@@ -4,6 +4,7 @@ from controllers import DataController, ProcessController
 from .schemas import ProcessRequest
 from models import FileModel, DataChunkModel
 from models.db_schemas.data_chunk import DataChunk
+from bson.objectid import ObjectId
 import os
 
 data_router = APIRouter()
@@ -11,7 +12,7 @@ data_router = APIRouter()
 @data_router.post("/uploadfile")
 async def upload_file(request: Request, file: UploadFile, app_settings: settings = Depends(get_settings)):
     
-    file_model = FileModel(db_client= request.app.db_client)
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
     data_controller = DataController()
     is_valid = data_controller.validate_file(file= file)
     check_dir = data_controller.check_dir()
@@ -34,7 +35,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
     overlap_size = process_request.overlap_size
     do_resrt = process_request.do_reset
 
-    file_model = FileModel(db_client= request.app.db_client)
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
     file_db = await file_model.get_or_insert_file(file_id= file_id)
 
     process_controller = ProcessController()
@@ -61,7 +62,7 @@ async def process_file(request: Request, process_request: ProcessRequest):
         for i, chunk in enumerate(file_chunks)
     ]
 
-    data_chunk_model = DataChunkModel(db_client= request.app.db_client)
+    data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
 
     if do_resrt:
         await data_chunk_model.delete_data_chunks(file_id= file_db.id)
@@ -71,4 +72,23 @@ async def process_file(request: Request, process_request: ProcessRequest):
     return {
         "message": "File processed successfully",
         "inserted chunks": num_records
+    }
+
+
+def convert_objectid_to_str(document):
+    if isinstance(document, dict):
+        return {key: str(value) if isinstance(value, ObjectId) else value for key, value in document.items()}
+    elif isinstance(document, list):
+        return [convert_objectid_to_str(item) for item in document]
+    return document
+
+@data_router.post("/getChunks_byFileId/{file_id}")
+async def get_chunks_by_fileId(request: Request, file_id: str):
+
+    data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
+    chunks_by_fileId = await data_chunk_model.get_all_chunks_by_file_id(file_id= file_id)
+
+    return {
+        "message": "Data chunks retrieved successfully",
+        "chunks": convert_objectid_to_str(chunks_by_fileId)
     }

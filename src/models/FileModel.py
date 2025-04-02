@@ -7,6 +7,25 @@ class FileModel(BaseDataModel):
         super().__init__(db_client= db_client)
         self.collection = self.db_client["Files"]
 
+    @classmethod
+    async def create_instance(cls, db_client):
+        instance = cls(db_client)
+        await instance.init_collection()
+        return instance
+
+    async def init_collection(self):
+        all_collections = await self.db_client.list_collection_names()
+
+        if "Files" not in all_collections:
+            self.collection = self.db_client["Files"]
+            indexes = File.get_indexes()
+            for index in indexes:
+                await self.collection.create_index(
+                    index["key"],
+                    name= index["name"],
+                    unique= index["unique"]
+                )
+
     async def insert_file(self, file: File):
 
         result = await self.collection.insert_one(file.dict(by_alias=True, exclude_unset=True))
