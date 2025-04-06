@@ -6,7 +6,9 @@ from models import FileModel, DataChunkModel
 from models.db_schemas.data_chunk import DataChunk
 from bson.objectid import ObjectId
 import os
+import logging
 
+logger = logging.getLogger('uvicorn.error')
 data_router = APIRouter()
 
 @data_router.post("/uploadfile")
@@ -65,13 +67,83 @@ async def process_file(request: Request, process_request: ProcessRequest):
     data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
 
     if do_resrt:
-        await data_chunk_model.delete_data_chunks(file_id= file_db.id)
+        await data_chunk_model.delete_data_chunks_by_fileId(file_id= file_db.id)
     
     num_records = await data_chunk_model.insert_many_data_chunks(data_chunks= file_chunks_db_records)
     
     return {
         "message": "File processed successfully",
         "inserted chunks": num_records
+    }
+
+
+@data_router.post("/processAllFiles")
+async def process_all_files(request: Request, process_request: ProcessRequest):
+    
+    chunk_size = process_request.chunk_size
+    overlap_size = process_request.overlap_size
+    do_resrt = process_request.do_reset
+
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
+
+    files, _ = await file_model.get_all_files()
+    files_ids = [
+        file.file_id for file in files
+    ]
+
+    if len(files_ids) == 0:
+        return {"status": "error",
+                "message": "No files to process"
+                }
+    
+    process_controller = ProcessController()
+
+    data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
+
+    if do_resrt:
+        await data_chunk_model.delete_data_chunks()
+
+    num_records = 0
+    num_files = 0
+    for file_id in files_ids:
+        file_db = await file_model.get_file_record(file_id= file_id)
+
+        file_content = process_controller.get_file_content(file_id= file_id)
+
+        if file_content is None:
+            logger.error(f"Error while processing file: {file_id}")
+            continue
+
+        file_chunks = process_controller.process_file_content(
+            file_content= file_content,
+            file_id= file_id,
+            chunk_size= chunk_size,
+            overlap_size= overlap_size
+        )
+
+        if file_chunks is None or len(file_chunks) == 0:
+            return {"status": "error",
+                    "message": "Error processing file"
+                    }
+        
+        file_chunks_db_records = [
+            DataChunk(
+                chunk_text= chunk.page_content,
+                chunk_metadata= chunk.metadata,
+                chunk_order= i + 1,
+                file_id= file_db.id
+            )
+            for i, chunk in enumerate(file_chunks)
+        ]
+
+        
+        num_records += await data_chunk_model.insert_many_data_chunks(data_chunks= file_chunks_db_records)
+        num_files += 1
+    
+    return {
+        "message": "File processed successfully",
+        "inserted chunks": num_records,
+        "processed files": num_files
     }
 
 
