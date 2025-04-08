@@ -12,3 +12,18 @@ class OpenAIEnums(Enum):
     DEVELOPER = "developer"
     USER = "user"
     ASSISTANT = "assistant"
+
+
+class CohereEnums(Enum):
+
+    STSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+
+    DOCUMENT = "search_document"
+    QUERY = "search_query"
+
+class DocumentTypeEnums(Enum):
+
+    QUERY = "query"
+    DOCUMENT = "document"
