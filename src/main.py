@@ -7,9 +7,9 @@ from stores.llm import LLMProviderFactory
 
 app = FastAPI()
 
-@app.on_event("startup")
-async def startup_db_client():
+async def app_startup():
     
+    # startup the db connection
     app_settings = get_settings()
     app.mongo_conn = AsyncIOMotorClient(app_settings.MONGO_URL)
     app.db_client = app.mongo_conn[app_settings.MONGO_DB]
@@ -29,9 +29,13 @@ async def startup_db_client():
     )
 
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
+async def app_shutdown():
+    # close the db connection
     app.mongo_conn.close()
+
+
+app.router.lifespan.on_startup.append(app_startup)
+app.router.lifespan.on_shutdown.append(app_shutdown)
     
 
 app.include_router(base.base_router)
