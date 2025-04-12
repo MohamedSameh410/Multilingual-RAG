@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class settings(BaseSettings):
 
     APP_NAME: str
-    OPENAI_API_KEY: str
 
     FILE_ALLOWED_TYPES: list
     FILE_MAX_SIZE: int
@@ -26,6 +25,10 @@ class settings(BaseSettings):
     INPUT_MAX_CHARACTERS: int = None
     OUTPUT_MAX_TOKENS: int = None
     TEMPERATURE: float = None
+
+    VECTOR_DB: str
+    VECTOR_DB_PATH: str
+    VECTOR_DB_DISTANCE_METHOD: str
 
     class Config:
         env_file = ".env"
