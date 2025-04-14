@@ -32,8 +32,8 @@ class QdrantDBProvider(VectorDBInterface):
     def list_all_clollections(self) -> List:
         return self.client.get_collections()
     
-    def get_collection_info(self, clolection_name: str) -> dict:
-        return self.client.get_collection(collection_name= clolection_name)
+    def get_collection_info(self, collection_name: str) -> dict:
+        return self.client.get_collection(collection_name= collection_name)
     
     def create_collection(self, collection_name: str, embedding_size: int, do_reset: bool = False):
         if do_reset:
