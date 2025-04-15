@@ -1,2 +1,2 @@
-from db_schemas.file import File
-from db_schemas.data_chunk import DataChunk
+from .file import File
+from .data_chunk import DataChunk
