@@ -36,7 +36,7 @@ class VectorDBInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_collectio(self, collection_name: str):
+    def delete_collection(self, collection_name: str):
         """Delete a collection from the vector database."""
         pass
 

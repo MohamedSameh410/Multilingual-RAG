@@ -74,3 +74,15 @@ class DataChunkModel(BaseDataModel):
         return await self.collection.find({
             "file_id": ObjectId(file_id) if isinstance(file_id, str) else file_id
         }).to_list(length= None)
+    
+    async def get_file_chunks(self, file_id: str, page_no: int=1, page_size: int=50):
+        records = await self.collection.find({
+                    "file_id": ObjectId(file_id) if isinstance(file_id, str) else file_id
+                }).skip(
+                    (page_no-1) * page_size
+                ).limit(page_size).to_list(length=None)
+
+        return [
+            DataChunk(**record)
+            for record in records
+        ]

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from routes import base, data
+from routes import base, data, rag
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings, settings
 from stores.llm import LLMProviderFactory
@@ -41,9 +41,12 @@ async def app_shutdown():
     app.vector_db_client.disconnect()
 
 
-app.router.lifespan.on_startup.append(app_startup)
-app.router.lifespan.on_shutdown.append(app_shutdown)
+# app.router.lifespan.on_startup.append(app_startup)
+# app.router.lifespan.on_shutdown.append(app_shutdown)
+app.on_event("startup")(app_startup)
+app.on_event("shutdown")(app_shutdown)
     
 
 app.include_router(base.base_router)
 app.include_router(data.data_router)
+app.include_router(rag.rag_router)
