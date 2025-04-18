@@ -78,7 +78,5 @@ class RAGController(BaseController):
         if not result:
             return False
         
-        return json.loads(
-            json.dumps(result, default= lambda x: x.__dict__)
-        )
+        return result
     

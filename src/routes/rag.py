@@ -108,9 +108,9 @@ async def search_index(request: Request, file_id: str, search_request: SearchReq
         embedding_client= request.app.embedding_client,
     )
 
-    result = rag_controller.search_vector_db_collection(file= file, text= search_request.text, limit= search_request.limit)
+    results = rag_controller.search_vector_db_collection(file= file, text= search_request.text, limit= search_request.limit)
 
-    if not result:
+    if not results:
         return JSONResponse(
             status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
             content= {
@@ -121,6 +121,6 @@ async def search_index(request: Request, file_id: str, search_request: SearchReq
     return JSONResponse(
         content= {
             "signal": "search successful",
-            "result": result,
+            "result": [result.dict() for result in results],
         }
     )
