@@ -30,6 +30,7 @@ async def index_file(request: Request, file_id: str, push_request: PushRequest):
         vector_db_client= request.app.vector_db_client,
         generation_client= request.app.generation_client,
         embedding_client= request.app.embedding_client,
+        template_parser= request.app.template_parser,
     )
     
     has_records = True
@@ -85,6 +86,7 @@ async def get_file_index_info(request: Request, file_id: str):
         vector_db_client= request.app.vector_db_client,
         generation_client= request.app.generation_client,
         embedding_client= request.app.embedding_client,
+        template_parser= request.app.template_parser,
     )
 
     collection_info = rag_controller.get_vector_db_collection_info(file= file)
