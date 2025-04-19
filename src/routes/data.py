@@ -154,11 +154,14 @@ def convert_objectid_to_str(document):
         return [convert_objectid_to_str(item) for item in document]
     return document
 
-@data_router.post("/getChunks_byFileId/{file_id}")
+@data_router.get("/getChunks_byFileId/{file_id}")
 async def get_chunks_by_fileId(request: Request, file_id: str):
 
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
+    file = await file_model.get_or_insert_file(file_id= file_id)
+
     data_chunk_model = await DataChunkModel.create_instance(db_client= request.app.db_client)
-    chunks_by_fileId = await data_chunk_model.get_all_chunks_by_file_id(file_id= file_id)
+    chunks_by_fileId = await data_chunk_model.get_all_chunks_by_file_id(file_id= file.id)
 
     return {
         "message": "Data chunks retrieved successfully",

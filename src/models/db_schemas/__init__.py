@@ -1,2 +1,2 @@
 from .file import File
-from .data_chunk import DataChunk
+from .data_chunk import DataChunk, RetrivedDocument
