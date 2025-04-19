@@ -106,6 +106,7 @@ async def search_index(request: Request, file_id: str, search_request: SearchReq
         vector_db_client= request.app.vector_db_client,
         generation_client= request.app.generation_client,
         embedding_client= request.app.embedding_client,
+        template_parser= request.app.template_parser,
     )
 
     results = rag_controller.search_vector_db_collection(file= file, text= search_request.text, limit= search_request.limit)
@@ -122,5 +123,42 @@ async def search_index(request: Request, file_id: str, search_request: SearchReq
         content= {
             "signal": "search successful",
             "result": [result.dict() for result in results],
+        }
+    )
+
+@rag_router.post("/index/answer/{file_id}")
+async def answer_rag(request: Request, file_id: str, search_request: SearchRequest):
+    
+    file_model = await FileModel.create_instance(db_client= request.app.db_client)
+    file = await file_model.get_or_insert_file(file_id= file_id)
+
+    rag_controller = RAGController(
+        vector_db_client= request.app.vector_db_client,
+        generation_client= request.app.generation_client,
+        embedding_client= request.app.embedding_client,
+        template_parser= request.app.template_parser,
+    )
+
+    answer, full_prompt, chat_history = rag_controller.answer_rag_question(
+        file= file,
+        query= search_request.text,
+        limit= search_request.limit,
+    )
+
+    if not answer:
+        return JSONResponse(
+            status_code= status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content= {
+                "signal": "answer failed",
+            }
+        )
+    
+    return JSONResponse(
+
+        content= {
+            "signal": "answer successful",
+            "answer": answer,
+            "full_prompt": full_prompt,
+            "chat_history": chat_history,
         }
     )

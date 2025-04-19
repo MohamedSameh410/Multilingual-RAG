@@ -6,12 +6,13 @@ import json
 
 class RAGController(BaseController):
 
-    def __init__(self, vector_db_client, generation_client, embedding_client):
+    def __init__(self, vector_db_client, generation_client, embedding_client, template_parser):
         super().__init__()
 
         self.vector_db_client = vector_db_client
         self.generation_client = generation_client
         self.embedding_client = embedding_client
+        self.template_parser = template_parser
 
     def create_collection_name(self, file_id: str):
         return f"collection_{file_id}".strip()
@@ -80,3 +81,42 @@ class RAGController(BaseController):
         
         return result
     
+    def answer_rag_question(self, file: File, query: str, limit: int = 5):
+
+        answer, full_prompt, chat_history = None, None, None
+
+        retrived_docs = self.search_vector_db_collection(
+            file= file,
+            text= query,
+            limit= limit,
+        )
+
+        if not retrived_docs or len(retrived_docs) == 0:
+            return answer, full_prompt, chat_history
+    
+        system_prompt = self.template_parser.get(group= "rag", key= "system_prompt")
+        documents_prompts = "\n".join([
+            self.template_parser.get(
+                group= "rag",
+                key= "document_prompt",
+                vars= {
+                    "doc_num": idx + 1,
+                    "chunk_text": doc.text,
+                }
+            )
+            for idx, doc in enumerate(retrived_docs)
+        ])
+        footer_prompt = self.template_parser.get(group= "rag", key= "footer_prompt")
+
+        chat_history = [
+            self.generation_client.construct_prompt(prompt= system_prompt, role= self.generation_client.enums.SYSTEM.value)
+        ]
+
+        full_prompt = "\n\n".join([documents_prompts, footer_prompt])
+
+        answer = self.generation_client.generate_text(prompt= full_prompt, chat_history= chat_history)
+
+        if not answer or len(answer) == 0:
+            return answer, full_prompt, chat_history
+        
+        return answer, full_prompt, chat_history
