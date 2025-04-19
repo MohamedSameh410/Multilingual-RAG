@@ -16,7 +16,7 @@ class OpenAIEnums(Enum):
 
 class CohereEnums(Enum):
 
-    STSTEM = "system"
+    SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
 
