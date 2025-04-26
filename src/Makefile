@@ -28,3 +28,18 @@ prune-all:
 
 # Clear all Docker data in one step
 clear-docker: go-to-docker-dir stop-all-containers remove-all-containers remove-all-images remove-all-volumes prune-all
+
+# Build and run Docker containers
+run-service:
+	docker compose -f '../docker/docker-compose.yml' up -d --build $(serviceName)
+
+run-all-services:
+	docker compose -f '../docker/docker-compose.yml' up -d --build
+
+# Stop Docker containers
+stop-service:
+	docker stop $(serviceName)
+
+stop-all-services:
+	docker compose -f '../docker/docker-compose.yml' down
+

@@ -5,9 +5,13 @@ from helpers.config import get_settings, settings
 from stores.llm import LLMProviderFactory
 from stores.vectorDB.VectorDBProviderFactory import VectorDBProviderFactory
 from stores.llm.templates import TemplatesParser
+from utils import setup_metrics
 
 
 app = FastAPI()
+
+# setup prometheus metrics
+setup_metrics(app)
 
 async def app_startup():
     
